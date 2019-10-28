@@ -23,16 +23,22 @@
     const scriptsTable = document.getElementById("scripts-table");
     const noScriptsElement = document.getElementById("no-scripts");
 
-    const scriptNames = witchcraft.getCurrentTabScriptNames();
+    const scripts = witchcraft.getCurrentTabScripts();
 
-    if (scriptNames && scriptNames.size > 0) {
+    if (scripts && scripts.size > 0) {
         noScriptsElement.classList.add("hidden");
         scriptsTable.classList.remove("hidden");
 
-        for (const scriptName of scriptNames) {
+        for (const script of scripts) {
+            const scriptName = script.get("name");
+            const scriptURL = script.get("url");
 
             const tdName = document.createElement("td");
-            tdName.innerText = scriptName;
+            const aName = document.createElement("a");
+            tdName.appendChild(aName)
+            aName.target = "_blank";
+            aName.innerText = scriptName;
+            aName.href = scriptURL;
 
             const tdType = document.createElement("td");
             const extensionMatch = scriptName.match(/\.([^.]+)$/);

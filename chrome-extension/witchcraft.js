@@ -48,6 +48,9 @@ class Witchcraft {
         /** @type {Map<number, Set<string>>} map with set of scripts loaded per tab, with the sole purpose of keeping
          *                                   the badge in the UI up-to-date */
         this.scriptNamesByTabId = new Map();
+        /** @type {Map<string, string>} map with script urls by filename for linking to script content */
+        this.scriptUrlsByName = new Map();
+
         this.currentTabId = -1;
 
         this.iconSize = 16;
@@ -97,6 +100,15 @@ class Witchcraft {
     }
 
     /**
+     * @param {String} scriptFileName
+     * @param {Number} tabId
+     */
+    registerScriptUrlForScriptName(scriptUrl, scriptFileName) {
+        this.scriptUrlsByName.set(scriptFileName, scriptUrl);
+    }
+
+
+    /**
      * Receives a domain and yields it back in parts, progressively adding sub-levels starting from the TLD. For
      * instance, if the hostname is `"foo.bar.com"`, the resulting sequence will be `"com"`, `"bar.com"`,
      * `"foo.bar.com"`.
@@ -117,6 +129,8 @@ class Witchcraft {
      */
     queryLocalServerForFile(scriptFileName) {
         const self = this;
+
+        const url = this.serverAddress + scriptFileName;
 
         return new Promise(resolve => {
             const request = new XMLHttpRequest();
@@ -307,6 +321,18 @@ class Witchcraft {
     getCurrentTabScriptNames() {
         return this.getScriptNamesForTabId(this.currentTabId);
     }
+    getCurrentTabScripts() {
+      const scriptNames = this.getScriptNamesForTabId(this.currentTabId);
+      // console.log(scriptNames.length);
+      // alert(scriptNames.length);
+      const scripts = new Set();
+      // alert(scriptNames.size);
+      for (const scriptName of scriptNames) {
+        scripts.add(new Map([ [ 'name', scriptName], ['url', this.serverAddress + scriptName ] ]));
+      }
+      // alert(scripts.size);
+      return scripts;
+    }
 
     /**
      * @param {Number} tabId
@@ -315,6 +341,24 @@ class Witchcraft {
     getScriptNamesForTabId(tabId) {
         return this.scriptNamesByTabId.get(tabId) || this.emptySet;
     }
+
+    /**
+     * Used by the popup window to link to scripts
+     *
+     * @returns {Set<string>}
+     */
+    getCurrentTabScriptUrls() {
+        return this.getScriptUrlsForTabId(this.currentTabId);
+    }
+
+    /**
+     * @param {Number} tabId
+     * @returns {Set<String>}
+     */
+    getScriptUrlsForTabId(tabId) {
+        return this.scriptUrlsByTabId.get(tabId) || this.emptySet;
+    }
+
 
     static get globalScriptName() {
         return "_global";
